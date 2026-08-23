@@ -1,0 +1,210 @@
+{
+  "name": "AI Confidence coach",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1hcVx0MXOeGX4UPpEWgfiJ1zay9XAl4mK0IeBRI6LIBU",
+          "mode": "list",
+          "cachedResultName": "AI Confidence Coach",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hcVx0MXOeGX4UPpEWgfiJ1zay9XAl4mK0IeBRI6LIBU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hcVx0MXOeGX4UPpEWgfiJ1zay9XAl4mK0IeBRI6LIBU/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        192,
+        -16
+      ],
+      "id": "e013ea57-692f-4fef-99bc-053d5cfa6cb8",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Jwp5ILEo8Zu2pGhA",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d459f94d-0093-4d58-bdc5-97c7a104e292",
+              "leftValue": "={{$json.Active}}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        400,
+        -16
+      ],
+      "id": "2da09e55-de44-4d23-b3c9-b54de594c887",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are an AI confidence coach for women.\n\nThe user's name is {{ $('Filter').item.json.Name }}.\n\nWrite a short, warm and encouraging confidence message for her.\n\nRequirements:\n- Use her first name.\n- Keep it under 100 words.\n- Be supportive and practical.\n- Do not mention that you are an AI.\n- Do not use markdown."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        608,
+        -16
+      ],
+      "id": "03d49860-8e9b-4348-a8ad-5df66bb825ab",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Filter').item.json.Email }}",
+        "subject": "Your Daily Confidence Boost 💜",
+        "emailType": "text",
+        "message": "={{ $json.output[0].content[0].text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        -16
+      ],
+      "id": "4b747cf9-b171-4a2f-a831-64f99dd6f3dd",
+      "name": "Send a message",
+      "webhookId": "644cba1b-d4b3-4769-b180-bdc67969f999",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "vVUWBGQttP1vfw3p",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -64,
+        0
+      ],
+      "id": "8acb4fad-cb8b-4732-862d-df08bf5084f8",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b39256d8-0dd3-4bfd-a239-415e69d77be5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "27cb6b0a578734c3f6b44f1226e68af10ab51704ea9cd1877d71650e9e869254"
+  },
+  "nodeGroups": [],
+  "id": "5GzOrdeONgZvjxmJ",
+  "tags": []
+}
